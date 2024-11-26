@@ -7,7 +7,7 @@ export default function App() {
 
   return (
     <>
-      <Cards score={score} setScore={setScore} />
+      <Cards setScore={setScore} />
       <div className="flex justify-center p-10">
         <p className="text-2xl text-white font-bold">Score: {score}</p>
       </div>
