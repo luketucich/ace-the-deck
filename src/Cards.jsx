@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 
 export default function Cards({ setScore }) {
-  // State variables for deck and animation
-  const [deck, setDeck] = useState(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [deck, setDeck] = useState(null); // Deck and clicked cards
+  const [isAnimating, setIsAnimating] = useState(false); // Prevent interaction during animation
 
-  // Shuffle the cards
+  // Shuffle function
   const shuffle = (array) => {
     const arrayCopy = [...array];
     for (let i = arrayCopy.length - 1; i > 0; i--) {
@@ -15,15 +14,17 @@ export default function Cards({ setScore }) {
     return arrayCopy;
   };
 
-  function animateCards(shuffledDeck) {
+  // Animate cards
+  const animateCards = (shuffledDeck) => {
     const cards = document.querySelectorAll("#cardFace");
+
     cards.forEach((card, index) => {
       card.animate(
         [
           { transform: "rotateY(0deg)" }, // Front face visible
           { transform: "rotateY(90deg)" }, // Mid flip to back
           { transform: "rotateY(180deg)" }, // Back face visible
-          { transform: "rotateZ(180deg)" }, // Flip to front
+          { transform: "rotateY(360deg)" }, // Flip to front
         ],
         {
           duration: 1500, // Full flip duration
@@ -32,63 +33,79 @@ export default function Cards({ setScore }) {
         }
       );
 
-      // Change the card image to card back at the halfway point
+      // Show the "back" card at 600 ms
       setTimeout(() => {
-        card.src = "https://www.deckofcardsapi.com/static/img/back.png";
+        setDeck((prev) => ({
+          ...prev,
+          cards: prev.cards.map((c, i) => {
+            if (i === index) {
+              return {
+                ...c,
+                image: "https://deckofcardsapi.com/static/img/back.png",
+              };
+            } else {
+              return c;
+            }
+          }),
+        }));
       }, 600);
 
-      // Change the card image to new card at the end point
+      // Show the "back" card at 600 ms
       setTimeout(() => {
-        card.src = shuffledDeck[index].image;
-      }, 1050);
+        setDeck((prev) => ({
+          ...prev,
+          cards: prev.cards.map((c, i) => ({
+            ...c,
+            image: shuffledDeck[i].image,
+          })),
+        }));
+      }, 1060);
     });
-  }
+  };
 
   // Handle card click
   const handleCardClick = (card) => {
-    if (isAnimating) return; // Prevent interaction during animation
+    // If lost, end game
+    if (deck.clickedCards.includes(card)) {
+      alert("You lose! Try again.");
+      fetchDeck();
+      setScore(0);
+    }
+
+    // Prevent interaction during animation
+    if (isAnimating) {
+      return;
+    } else {
+      setIsAnimating(true);
+    }
 
     const shuffledDeck = shuffle(deck.cards);
-    setIsAnimating(true);
+
     animateCards(shuffledDeck);
 
-    // Start animation first, then delay state update
+    // After animation, update state
     setTimeout(() => {
-      setDeck((prev) => {
-        if (prev.clickedCards.includes(card)) {
-          fetchDeck(); // Reset the deck if losing
-          setScore(0);
-          alert("You lose! Try again.");
-          return prev;
-        } else {
-          return {
-            ...prev,
-            cards: shuffledDeck,
-            clickedCards: [...prev.clickedCards, card],
-          };
-        }
-      });
+      setScore((prevScore) => prevScore + 1);
+      setDeck((prevDeck) => ({
+        ...prevDeck,
+        cards: shuffledDeck,
+        clickedCards: [...prevDeck.clickedCards, card],
+      }));
 
-      // Update the score
-      if (!deck?.clickedCards.includes(card)) {
-        setScore((prevScore) => prevScore + 1);
-      }
-
-      setIsAnimating(false); // Reset animation state
-    }, 1500); // Delay to match animation duration
+      setIsAnimating(false);
+    }, 1500);
   };
 
-  // Fetch card deck from API
+  // Fetch a new deck from the API
   const fetchDeck = () => {
     fetch("https://deckofcardsapi.com/api/deck/new/draw/?count=52")
       .then((response) => response.json())
-      .then((data) =>
+      .then((data) => {
         setDeck({
           cards: data.cards,
           clickedCards: [],
-          id: crypto.randomUUID(),
-        })
-      )
+        });
+      })
       .catch((error) => console.error(error));
   };
 
@@ -97,7 +114,7 @@ export default function Cards({ setScore }) {
     fetchDeck();
   }, []);
 
-  // Display cards
+  // Render cards
   return (
     <div className="flex flex-wrap gap-16 justify-center p-10">
       {deck &&
@@ -105,14 +122,12 @@ export default function Cards({ setScore }) {
           <div
             key={card.code}
             className="flex flex-col 
-                    items-center
-                    hover:scale-110
-                    hover:cursor-pointer
-                    hover:skew-x-1
-                    hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.75)]
-                    transition-transform duration-500 ease-out transform-gpu
-                    "
-            // Add card to used pile
+                      items-center
+                      hover:scale-110
+                      hover:cursor-pointer
+                      hover:skew-x-1
+                      hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.75)]
+                      transition-transform duration-500 ease-out transform-gpu"
             onClick={() => handleCardClick(card)}
           >
             <img
