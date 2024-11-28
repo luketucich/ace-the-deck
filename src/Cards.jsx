@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const flipSFX = new Audio("../flip.mp3");
 
 export default function Cards({ score, setScore, setHighScore }) {
   const [deck, setDeck] = useState(null); // Deck and clicked cards
@@ -94,6 +95,12 @@ export default function Cards({ score, setScore, setHighScore }) {
         setIsAnimating(false);
       }, 1500);
     } else {
+      // Play flip sound
+      setTimeout(() => {
+        flipSFX.playbackRate = 0.75;
+        flipSFX.play();
+      }, 300);
+
       // If not lost, increment score
       setScore((prevScore) => prevScore + 1);
 
