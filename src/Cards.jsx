@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function Cards({ setScore }) {
+export default function Cards({ score, setScore, setHighScore }) {
   const [deck, setDeck] = useState(null); // Deck and clicked cards
   const [isAnimating, setIsAnimating] = useState(false); // Prevent interaction during animation
 
@@ -59,41 +59,59 @@ export default function Cards({ setScore }) {
             image: shuffledDeck[i].image,
           })),
         }));
-      }, 1060);
+      }, 1080);
     });
   };
 
   // Handle card click
   const handleCardClick = (card) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+
     // If lost, end game
     if (deck.clickedCards.includes(card)) {
-      alert("You lose! Try again.");
-      fetchDeck();
+      // Reset score and update high score
       setScore(0);
-    }
+      setHighScore((prevHighScore) =>
+        prevHighScore < score ? score : prevHighScore
+      );
 
-    // Prevent interaction during animation
-    if (isAnimating) {
-      return;
+      //   Announce loss
+      alert(`You lost! Your score was ${score}.`);
+
+      //   Shuffle cards and play animation
+      const shuffledDeck = shuffle(deck.cards);
+      animateCards(shuffledDeck);
+
+      // After animation, update state
+      setTimeout(() => {
+        setDeck((prevDeck) => ({
+          ...prevDeck,
+          cards: shuffledDeck,
+          clickedCards: [],
+        }));
+
+        setIsAnimating(false);
+      }, 1500);
     } else {
-      setIsAnimating(true);
-    }
-
-    const shuffledDeck = shuffle(deck.cards);
-
-    animateCards(shuffledDeck);
-
-    // After animation, update state
-    setTimeout(() => {
+      // If not lost, increment score
       setScore((prevScore) => prevScore + 1);
-      setDeck((prevDeck) => ({
-        ...prevDeck,
-        cards: shuffledDeck,
-        clickedCards: [...prevDeck.clickedCards, card],
-      }));
 
-      setIsAnimating(false);
-    }, 1500);
+      //   Shuffle cards and play animation
+      const shuffledDeck = shuffle(deck.cards);
+      animateCards(shuffledDeck);
+
+      // After animation, update state
+      setTimeout(() => {
+        setDeck((prevDeck) => ({
+          ...prevDeck,
+          cards: shuffledDeck,
+          clickedCards: [...prevDeck.clickedCards, card],
+        }));
+
+        setIsAnimating(false);
+      }, 1500);
+    }
   };
 
   // Fetch a new deck from the API
@@ -116,16 +134,16 @@ export default function Cards({ setScore }) {
 
   // Render cards
   return (
-    <div className="flex flex-wrap gap-16 justify-center p-10">
+    <div className="flex flex-wrap gap-16 w-1/2 justify-center">
       {deck &&
         deck.cards.slice(0, 5).map((card) => (
           <div
             key={card.code}
-            className="flex flex-col 
+            className="flex flex-col
                       items-center
                       hover:scale-110
                       hover:cursor-pointer
-                      hover:skew-x-1
+                      hover:skew-x-[1deg]
                       hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.75)]
                       transition-transform duration-500 ease-out transform-gpu"
             onClick={() => handleCardClick(card)}
@@ -133,7 +151,7 @@ export default function Cards({ setScore }) {
             <img
               src={card.image}
               alt={card.code}
-              className="w-20 h-auto transition-all ease-in-out"
+              className="w-28 h-auto transition-all ease-in-out"
               id="cardFace"
             />
           </div>
