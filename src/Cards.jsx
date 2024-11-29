@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 const flipSFX = new Audio("../flip.mp3");
+const music = new Audio("../music.mp3");
 
 export default function Cards({ score, setScore, setHighScore }) {
   const [deck, setDeck] = useState(null); // Deck and clicked cards
@@ -66,8 +67,15 @@ export default function Cards({ score, setScore, setHighScore }) {
 
   // Handle card click
   const handleCardClick = (card) => {
+    // Prevent interaction during animation
     if (isAnimating) return;
     setIsAnimating(true);
+
+    // Play flip sound
+    setTimeout(() => {
+      flipSFX.playbackRate = 0.75;
+      flipSFX.play();
+    }, 300);
 
     // If lost, end game
     if (deck.clickedCards.includes(card)) {
@@ -95,12 +103,6 @@ export default function Cards({ score, setScore, setHighScore }) {
         setIsAnimating(false);
       }, 1500);
     } else {
-      // Play flip sound
-      setTimeout(() => {
-        flipSFX.playbackRate = 0.75;
-        flipSFX.play();
-      }, 300);
-
       // If not lost, increment score
       setScore((prevScore) => prevScore + 1);
 
@@ -137,11 +139,14 @@ export default function Cards({ score, setScore, setHighScore }) {
   // Fetch deck on mount
   useEffect(() => {
     fetchDeck();
+    music.loop = true;
+    music.volume = 0.3;
+    music.play();
   }, []);
 
   // Render cards
   return (
-    <div className="flex flex-wrap gap-16 w-1/2 justify-center">
+    <div className="flex flex-wrap gap-16 justify-center animate-fadeIn">
       {deck &&
         deck.cards.slice(0, 5).map((card) => (
           <div
