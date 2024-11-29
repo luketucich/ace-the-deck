@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 const flipSFX = new Audio("../flip.mp3");
 const music = new Audio("../music.mp3");
 
-export default function Cards({ score, setScore, setHighScore }) {
+export default function Cards({ score, setScore }) {
   const [deck, setDeck] = useState(null); // Deck and clicked cards
   const [isAnimating, setIsAnimating] = useState(false); // Prevent interaction during animation
 
@@ -81,9 +81,8 @@ export default function Cards({ score, setScore, setHighScore }) {
     if (deck.clickedCards.includes(card)) {
       // Reset score and update high score
       setScore(0);
-      setHighScore((prevHighScore) =>
-        prevHighScore < score ? score : prevHighScore
-      );
+      if (parseInt(localStorage.getItem("highScore")) < score)
+        localStorage.setItem("highScore", score);
 
       //   Announce loss
       alert(`You lost! Your score was ${score}.`);
