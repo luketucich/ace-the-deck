@@ -50,31 +50,41 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen gap-24 p-8 items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       {!isGameStarted && <StartGameButton onStart={handleStartGame} />}
       {isGameStarted && (
         <>
-          <Cards score={score} setScore={setScore} />
-          <div className="flex gap-12 justify-center items-center">
+          <div className="flex gap-8 items-center justify-center relative bottom-24">
             <div className="flex flex-col items-center">
-              <p className="text-2xl text-white font-medium">Score</p>
+              <p className="text-xl md:text-2xl text-white font-medium text-center">
+                Score
+              </p>
               <div className="relative">
-                <img src="chip-score.svg" width={100} />
+                <img
+                  src="chip-score.svg"
+                  className="w-24 sm:w-20 md:w-24 lg:w-32"
+                />
                 <p className="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold">
                   {score}
                 </p>
               </div>
             </div>
             <div className="flex flex-col items-center">
-              <p className="text-2xl text-white font-medium">High Score</p>
+              <p className="text-xl md:text-2xl text-white font-medium text-center">
+                High Score
+              </p>
               <div className="relative">
-                <img src="chip-highscore.svg" width={100} />
+                <img
+                  src="chip-highscore.svg"
+                  className="w-24 sm:w-20 md:w-24 lg:w-32"
+                />
                 <p className="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold">
                   {localStorage.getItem("highScore")}
                 </p>
               </div>
             </div>
           </div>
+          <Cards score={score} setScore={setScore} />
         </>
       )}
     </div>

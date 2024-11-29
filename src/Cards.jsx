@@ -145,7 +145,7 @@ export default function Cards({ score, setScore }) {
 
   // Render cards
   return (
-    <div className="flex flex-wrap gap-16 justify-center animate-fadeIn">
+    <div className="flex flex-wrap gap-8 md:gap-16 justify-center animate-fadeIn h-min">
       {deck &&
         deck.cards.slice(0, 5).map((card) => (
           <div
@@ -162,7 +162,7 @@ export default function Cards({ score, setScore }) {
             <img
               src={card.image}
               alt={card.code}
-              className="w-28 h-auto transition-all ease-in-out"
+              className="w-24 md:w-32 transition-all ease-in-out"
               id="cardFace"
             />
           </div>
